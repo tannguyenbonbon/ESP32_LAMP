@@ -6,7 +6,6 @@
 
 #include "pin_config.h"
 #include "project_info.h"
-#include "serial_log.h"
 #include "wifi_task.h"
 #include "blynk_server.h"
 #include "interrupt_task.h"
@@ -14,20 +13,18 @@
 
 EventGroupHandle_t event_group = NULL;
 
-
 void setup() 
 {
   event_group = xEventGroupCreate();
 
-  #ifdef SERIAL_LOG_DEBUG
-    Serial.begin(115200);
-  #endif
+  Serial.begin(115200);
+  Serial.println("");
 
   init_relay_gpio();
 
   enable_interrupt(BUTTON_PIN);
 
-  wifi_init();
+  start_wifi();
 
   // Blynk.begin(BLYNK_AUTH_TOKEN, SSID, PASSWORDWORD);
 }

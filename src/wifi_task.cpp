@@ -1,49 +1,102 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
-#include "serial_log.h"
 #include "project_info.h"
 
-const char *SSID = "CENTRAL SPACE 69L1B";
-const char *PASSWORD = "central69";
+// const char *SSID     =              "CENTRAL SPACE 69L1B";
+// const char *PASSWORD =              "central69";
 
-extern EventGroupHandle_t event_group = NULL;
+const char *SSID     =              "Tân Nguyễn";
+const char *PASSWORD =              "123456677";
 
-static void WiFi_Task(void *pvParameters)
+#define CONNECTION_TIMEOUT_MS       10000       //* 10s
+#define RETRY_CONNECTION_AFTER_MS   60000       //* 60s
+#define DELAY_CHECK_WIFI_STATUS     1000        //* 5s
+
+extern EventGroupHandle_t event_group;
+
+static void wifi_task(void *pvParameters)
 {
-    SERIAL_LOG("Connecting to Wi-Fi: %s\n", SSID);
+    while(true)
+    {
+        EventBits_t bits = xEventGroupWaitBits(event_group, WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT, pdTRUE, pdFALSE, portMAX_DELAY);
+
+        if (bits & WIFI_CONNECTED_BIT) 
+        {
+            Serial.println("WiFi is connected!");
+        } else if (bits & WIFI_DISCONNECTED_BIT) {
+            Serial.println("WiFi is disconnected!");
+        }
+    }
+
+    vTaskDelete(NULL);   
+}
+
+
+static void check_wifi_status_task(void *pvParameters)
+{
+    while (true)
+    {
+        EventBits_t bits = xEventGroupGetBits(event_group);
+
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            if(!(bits & WIFI_CONNECTED_BIT))
+            {
+                xEventGroupSetBits(event_group, WIFI_CONNECTED_BIT);
+                xEventGroupClearBits(event_group, WIFI_DISCONNECTED_BIT);
+            }
+        }
+        else if(WiFi.status() == WL_DISCONNECTED)
+        {
+            if(!(bits & WIFI_DISCONNECTED_BIT))
+            {
+                xEventGroupSetBits(event_group, WIFI_DISCONNECTED_BIT);
+                xEventGroupClearBits(event_group, WIFI_CONNECTED_BIT);
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(DELAY_CHECK_WIFI_STATUS));
+    }
+
+    vTaskDelete(NULL);
+}
+
+static void init_wifi_task()
+{
+    xTaskCreate(check_wifi_status_task, "check_wifi_status_task", 4096, NULL, 1, NULL);
+    xTaskCreate(wifi_task, "wifi_task", 4096, NULL, 2, NULL);
+}
+
+void start_wifi()
+{
+    Serial.printf("Connecting to Wi-Fi: %s ", SSID);
+
     WiFi.begin(SSID, PASSWORD);
 
     unsigned long startAttemptTime = millis();
-    const unsigned long connectionTimeout = 10000; // Thời gian chờ kết nối Wi-Fi (10 giây)
+    const unsigned long connectionTimeout = CONNECTION_TIMEOUT_MS;
 
     while (true)
     {
         if (WiFi.status() == WL_CONNECTED)
         {
-            SERIAL_LOG("\nConnected to WiFi\n");
-            // Xóa bit NOT_CONNECTED và đặt bit CONNECTED
+            Serial.printf("\nConnected to %s\n", SSID);
             xEventGroupClearBits(event_group, WIFI_DISCONNECTED_BIT);
             xEventGroupSetBits(event_group, WIFI_CONNECTED_BIT);
             break;
         }
 
+        Serial.print(".");
+
         if (millis() - startAttemptTime > connectionTimeout)
         {
-            SERIAL_LOG("Failed to connect to WiFi. Retrying in 30 seconds...\n");
-            // Đặt bit NOT_CONNECTED
+            Serial.println("\nConnection timeout! Retrying later");
             xEventGroupSetBits(event_group, WIFI_DISCONNECTED_BIT);
-            vTaskDelay(pdMS_TO_TICKS(30000)); // Đợi 30 giây trước khi thử lại
-            startAttemptTime = millis();      // Đặt lại thời gian chờ
-            WiFi.begin(SSID, PASSWORD);       // Thử kết nối lại
+            xEventGroupClearBits(event_group, WIFI_CONNECTED_BIT);
+            break;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(500)); // Đợi 500ms trước khi kiểm tra lại
-        SERIAL_LOG(".");
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
-}
-
-void wifi_init()
-{
-    xTaskCreate(WiFi_Task, "WiFi_Task", 4096, NULL, 1, NULL);
+    init_wifi_task();
 }
