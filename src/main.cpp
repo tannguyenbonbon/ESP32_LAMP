@@ -14,6 +14,7 @@
 
 EventGroupHandle_t event_group = NULL;
 
+
 void setup() 
 {
   event_group = xEventGroupCreate();
