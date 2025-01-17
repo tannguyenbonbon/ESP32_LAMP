@@ -24,6 +24,8 @@ void setup()
 
   enable_interrupt(BUTTON_PIN);
 
+  start_lamp_control();
+
   start_wifi();
 
   // Blynk.begin(BLYNK_AUTH_TOKEN, SSID, PASSWORDWORD);
