@@ -15,22 +15,22 @@ const char *PASSWORD =              "123456677";
 
 extern EventGroupHandle_t event_group;
 
-static void wifi_task(void *pvParameters)
-{
-    while(true)
-    {
-        EventBits_t bits = xEventGroupWaitBits(event_group, WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT, pdTRUE, pdFALSE, portMAX_DELAY);
+// static void wifi_task(void *pvParameters)
+// {
+//     while(true)
+//     {
+//         EventBits_t bits = xEventGroupWaitBits(event_group, WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
 
-        if (bits & WIFI_CONNECTED_BIT) 
-        {
-            Serial.println("WiFi is connected!");
-        } else if (bits & WIFI_DISCONNECTED_BIT) {
-            Serial.println("WiFi is disconnected!");
-        }
-    }
+//         if (bits & WIFI_CONNECTED_BIT) 
+//         {
+//             // Serial.println("WiFi is connected!");
+//         } else if (bits & WIFI_DISCONNECTED_BIT) {
+//             // Serial.println("WiFi is disconnected!");
+//         }
+//     }
 
-    vTaskDelete(NULL);   
-}
+//     vTaskDelete(NULL);   
+// }
 
 
 static void check_wifi_status_task(void *pvParameters)
@@ -43,14 +43,16 @@ static void check_wifi_status_task(void *pvParameters)
         {
             if(!(bits & WIFI_CONNECTED_BIT))
             {
+                Serial.println("SET WIFI_CONNECTED_BIT");
                 xEventGroupSetBits(event_group, WIFI_CONNECTED_BIT);
                 xEventGroupClearBits(event_group, WIFI_DISCONNECTED_BIT);
             }
         }
-        else if(WiFi.status() == WL_DISCONNECTED)
+        else
         {
             if(!(bits & WIFI_DISCONNECTED_BIT))
             {
+                Serial.println("SET WIFI_DISCONNECTED_BIT");
                 xEventGroupSetBits(event_group, WIFI_DISCONNECTED_BIT);
                 xEventGroupClearBits(event_group, WIFI_CONNECTED_BIT);
             }
@@ -64,7 +66,7 @@ static void check_wifi_status_task(void *pvParameters)
 static void init_wifi_task()
 {
     xTaskCreate(check_wifi_status_task, "check_wifi_status_task", 4096, NULL, 1, NULL);
-    xTaskCreate(wifi_task, "wifi_task", 4096, NULL, 2, NULL);
+    // xTaskCreate(wifi_task, "wifi_task", 4096, NULL, 2, NULL);
 }
 
 void start_wifi()
@@ -81,8 +83,6 @@ void start_wifi()
         if (WiFi.status() == WL_CONNECTED)
         {
             Serial.printf("\nConnected to %s\n", SSID);
-            xEventGroupClearBits(event_group, WIFI_DISCONNECTED_BIT);
-            xEventGroupSetBits(event_group, WIFI_CONNECTED_BIT);
             break;
         }
 
@@ -91,8 +91,6 @@ void start_wifi()
         if (millis() - startAttemptTime > connectionTimeout)
         {
             Serial.println("\nConnection timeout! Retrying later");
-            xEventGroupSetBits(event_group, WIFI_DISCONNECTED_BIT);
-            xEventGroupClearBits(event_group, WIFI_CONNECTED_BIT);
             break;
         }
 
