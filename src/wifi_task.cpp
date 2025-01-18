@@ -15,24 +15,6 @@ const char *PASSWORD =              "123456677";
 
 extern EventGroupHandle_t event_group;
 
-// static void wifi_task(void *pvParameters)
-// {
-//     while(true)
-//     {
-//         EventBits_t bits = xEventGroupWaitBits(event_group, WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
-
-//         if (bits & WIFI_CONNECTED_BIT) 
-//         {
-//             // Serial.println("WiFi is connected!");
-//         } else if (bits & WIFI_DISCONNECTED_BIT) {
-//             // Serial.println("WiFi is disconnected!");
-//         }
-//     }
-
-//     vTaskDelete(NULL);   
-// }
-
-
 static void check_wifi_status_task(void *pvParameters)
 {
     while (true)
@@ -66,7 +48,6 @@ static void check_wifi_status_task(void *pvParameters)
 static void init_wifi_task()
 {
     xTaskCreate(check_wifi_status_task, "check_wifi_status_task", 4096, NULL, 1, NULL);
-    // xTaskCreate(wifi_task, "wifi_task", 4096, NULL, 2, NULL);
 }
 
 void start_wifi()

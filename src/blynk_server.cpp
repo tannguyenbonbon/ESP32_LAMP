@@ -1,6 +1,5 @@
 #include "blynk_server.h"
 #include <BlynkSimpleEsp32.h>
-#include "relay_control.h"
 
 extern EventGroupHandle_t event_group;
 

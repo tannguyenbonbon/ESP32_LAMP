@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "pin_config.h"
-#include "relay_control.h"
 #include "blynk_server.h"
 
 volatile bool interruptFlag = false;
@@ -25,6 +24,17 @@ void disable_interrupt(int interrupt_pin)
   detachInterrupt(interrupt_pin);
 }
 
+static void control_relay(bool status)
+{
+  digitalWrite(RELAY_PIN, status ? HIGH : LOW);
+}
+
+static void init_relay_gpio()
+{
+    pinMode(RELAY_PIN, OUTPUT);
+    control_relay(LOW);         //TURN OFF RELAY
+}
+
 static void control_interrupt_task(void *pvParameters)
 {
   while (true)
@@ -45,8 +55,10 @@ static void control_interrupt_task(void *pvParameters)
   vTaskDelete(NULL);
 }
 
-void start_lamp_control()
+void start_relay_control()
 {
+  init_relay_gpio();
   xTaskCreate(control_interrupt_task, "control_interrupt_task", 4096, NULL, 1, NULL);
+  enable_interrupt(BUTTON_PIN);
 }
 

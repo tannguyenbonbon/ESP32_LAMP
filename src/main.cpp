@@ -9,7 +9,6 @@
 #include "wifi_task.h"
 #include "blynk_server.h"
 #include "interrupt_task.h"
-#include "relay_control.h"
 
 EventGroupHandle_t event_group = NULL;
 
@@ -20,11 +19,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("");
 
-  init_relay_gpio();
-
-  enable_interrupt(BUTTON_PIN);
-
-  start_lamp_control();
+  start_relay_control();
 
   start_wifi();
 
