@@ -14,5 +14,6 @@
 
 #define INTERRUPT_FLAG_ENABLE_BIT       BIT3
 
+#define TIMER_TRIGGER_BIT               BIT4
 
 #endif //PROJECT_INFO_H_

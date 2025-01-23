@@ -9,6 +9,7 @@
 #include "wifi_task.h"
 #include "blynk_server.h"
 #include "interrupt_task.h"
+#include "timer_task.h"
 
 EventGroupHandle_t event_group = NULL;
 
@@ -23,14 +24,10 @@ void setup()
 
   start_wifi();
 
-  // Blynk.begin(BLYNK_AUTH_TOKEN, SSID, PASSWORDWORD);
+  start_blynk_server();
+
 }
 
 void loop() 
 {
-  // Blynk.run();
-
-  // control_interrupt(interruptFlag);
-
-  // delay(10);
 }

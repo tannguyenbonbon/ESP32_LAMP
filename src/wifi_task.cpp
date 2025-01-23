@@ -3,11 +3,11 @@
 
 #include "project_info.h"
 
-// const char *SSID     =              "CENTRAL SPACE 69L1B";
-// const char *PASSWORD =              "central69";
+const char *SSID     =              "CENTRAL SPACE 69L1B";
+const char *PASSWORD =              "central69";
 
-const char *SSID     =              "Tân Nguyễn";
-const char *PASSWORD =              "123456677";
+// const char *SSID     =              "Tân Nguyễn";
+// const char *PASSWORD =              "123456677";
 
 #define CONNECTION_TIMEOUT_MS       10000       //* 10s
 #define RETRY_CONNECTION_AFTER_MS   60000       //* 60s
@@ -41,7 +41,7 @@ static void check_wifi_status_task(void *pvParameters)
         }
         vTaskDelay(pdMS_TO_TICKS(DELAY_CHECK_WIFI_STATUS));
     }
-
+    
     vTaskDelete(NULL);
 }
 

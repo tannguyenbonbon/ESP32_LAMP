@@ -24,7 +24,7 @@ void disable_interrupt(int interrupt_pin)
   detachInterrupt(interrupt_pin);
 }
 
-static void control_relay(bool status)
+void control_relay(bool status)
 {
   digitalWrite(RELAY_PIN, status ? HIGH : LOW);
 }
