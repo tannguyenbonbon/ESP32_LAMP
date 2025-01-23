@@ -10,6 +10,7 @@
 #include "blynk_server.h"
 #include "interrupt_task.h"
 #include "timer_task.h"
+#include "gpio_task.h"
 
 EventGroupHandle_t event_group = NULL;
 
@@ -19,6 +20,8 @@ void setup()
 
   Serial.begin(115200);
   Serial.println("");
+
+  init_gpio();
 
   start_relay_control();
 

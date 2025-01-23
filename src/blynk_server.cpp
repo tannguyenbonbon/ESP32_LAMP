@@ -8,14 +8,23 @@ extern EventGroupHandle_t event_group;
 
 extern bool relay_status;
 
-void syncVirtualPin(int PIN, int status) 
+void sync_VirtualPin(int PIN, int status) 
 {
   Blynk.virtualWrite(PIN, status);
+}
+
+static void reset_VirtualPin()
+{
+  Blynk.virtualWrite(V0, 0);
+  Blynk.virtualWrite(V1, 0);
 }
 
 static void init_blynk_task(void *pvParameters)
 {
   Blynk.config(BLYNK_AUTH_TOKEN);
+  Blynk.connect();
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  reset_VirtualPin();
 
   while(true)
   {
